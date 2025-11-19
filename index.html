@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Recommendation System</title>
+        <style>
+        /* RESET */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* PALETTE – Sage Mint + Slate Navy */
+        :root {
+            --sage-mint:     #B1CCBF;
+            --slate-navy:    #35444F;
+            --navy-dark:     #2C3A44;
+            --light-bg:      #F8FAF9;
+            --card-bg:       #FFFFFF;
+            --text-dark:     #2D3E48;
+            --text-muted:    #60707A;
+            --shadow:        rgba(53, 68, 79, 0.12);
+            --shadow-hover:  rgba(53, 68, 79, 0.22);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, var(--light-bg) 0%, #E8F0EC 100%);
+            min-height: 100vh;
+            padding: 50px 20px;
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+
+        .container { max-width: 1300px; margin: 0 auto; }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        h1 {
+            font-size: 3.6rem;
+            font-weight: 300;
+            color: var(--slate-navy);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+
+        /* FILTERS */
+        .filters {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: 0 20px 50px var(--shadow);
+            margin-bottom: 60px;
+            border: 1px solid #e2e8e5;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--navy-dark);
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.98rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #d0dbd6;
+            border-radius: 16px;
+            background: #f5f9f6;
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: all 0.35s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--sage-mint);
+            background: white;
+            box-shadow: 0 0 0 5px rgba(177, 204, 191, 0.15);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 28px;
+            margin-top: 15px;
+        }
+
+        /* BUTTON */
+        .btn {
+            margin-top: 32px;
+            background: var(--slate-navy);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .btn:hover {
+            background: var(--navy-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-hover);
+        }
+
+        /* EVENT CARDS */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 38px;
+        }
+
+        .event-card {
+            background: var(--card-bg);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px var(--shadow);
+            transition: all 0.4s ease;
+            border: 1px solid #e8edea;
+        }
+
+        .event-card:hover {
+            transform: translateY(-16px);
+            box-shadow: 0 32px 65px var(--shadow-hover);
+        }
+
+        .event-image {
+            width: 100%;
+            height: 270px;
+            background: linear-gradient(135deg, var(--sage-mint), #9ab8aa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 5.2rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .event-content {
+            padding: 30px;
+        }
+
+        .event-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--slate-navy);
+            margin-bottom: 16px;
+        }
+
+        .event-details {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+        }
+
+        .event-detail-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .event-detail-item::before {
+            content: "◆";
+            color: var(--sage-mint);
+            margin-right: 14px;
+            font-size: 0.9em;
+        }
+
+        .event-tag {
+            display: inline-block;
+            background: var(--sage-mint);
+            color: var(--slate-navy);
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 20px;
+            background: var(--card-bg);
+            border-radius: 28px;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            border: 3px dashed #c8d9d1;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            .events-grid, .filter-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎉 Event Recommendation System</h1>
+            <p class="subtitle">Discover amazing events tailored just for you</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="search">Search Events</label>
+                <input type="text" id="search" placeholder="Search by event name or keyword...">
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">All Categories</option>
+                        <option value="music">Music</option>
+                        <option value="sports">Sports</option>
+                        <option value="technology">Technology</option>
+                        <option value="art">Art & Culture</option>
+                        <option value="food">Food & Drink</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date">Date</label>
+                    <select id="date">
+                        <option value="">Any Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="location">Location</label>
+                    <select id="location">
+                        <option value="">All Locations</option>
+                        <option value="downtown">Downtown</option>
+                        <option value="uptown">Uptown</option>
+                        <option value="suburbs">Suburbs</option>
+                        <option value="online">Online</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="filterEvents()">Find Events</button>
+        </div>
+
+        <div class="events-grid" id="eventsGrid">
+            <!-- Events will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const events = [
+            {
+                id: 1,
+                title: "Summer Music Festival",
+                category: "music",
+                date: "This Week",
+                location: "Downtown",
+                price: "$50",
+                icon: "🎵",
+                description: "Join us for an unforgettable evening of live music"
+            },
+            {
+                id: 2,
+                title: "Tech Innovation Summit",
+                category: "technology",
+                date: "This Month",
+                location: "Uptown",
+                price: "$75",
+                icon: "💻",
+                description: "Explore the latest in AI and technology trends"
+            },
+            {
+                id: 3,
+                title: "Food & Wine Tasting",
+                category: "food",
+                date: "Today",
+                location: "Downtown",
+                price: "$40",
+                icon: "🍷",
+                description: "Savor exquisite cuisine from local chefs"
+            },
+            {
+                id: 4,
+                title: "Basketball Championship",
+                category: "sports",
+                date: "This Week",
+                location: "Suburbs",
+                price: "$30",
+                icon: "🏀",
+                description: "Watch the season's most exciting matchup"
+            },
+            {
+                id: 5,
+                title: "Art Gallery Opening",
+                category: "art",
+                date: "This Month",
+                location: "Downtown",
+                price: "Free",
+                icon: "🎨",
+                description: "Contemporary art exhibition featuring local artists"
+            },
+            {
+                id: 6,
+                title: "Virtual Coding Workshop",
+                category: "technology",
+                date: "Today",
+                location: "Online",
+                price: "$25",
+                icon: "👨‍💻",
+                description: "Learn modern web development techniques"
+            }
+        ];
+
+        function displayEvents(eventsToShow) {
+            const grid = document.getElementById('eventsGrid');
+            
+            if (eventsToShow.length === 0) {
+                grid.innerHTML = '<div class="no-results">No events found. Try adjusting your filters!</div>';
+                return;
+            }
+            
+            grid.innerHTML = eventsToShow.map(event => `
+                <div class="event-card">
+                    <div class="event-image">${event.icon}</div>
+                    <div class="event-content">
+                        <h3 class="event-title">${event.title}</h3>
+                        <div class="event-details">
+                            <div class="event-detail-item">📅 ${event.date}</div>
+                            <div class="event-detail-item">📍 ${event.location}</div>
+                            <div class="event-detail-item">💵 ${event.price}</div>
+                            <p style="margin-top: 10px; color: #aaa;">${event.description}</p>
+                        </div>
+                        <span class="event-tag">${event.category}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterEvents() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const category = document.getElementById('category').value;
+            const date = document.getElementById('date').value;
+            const location = document.getElementById('location').value;
+
+            let filtered = events.filter(event => {
+                const matchesSearch = event.title.toLowerCase().includes(searchTerm) || 
+                                     event.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || event.category === category;
+                const matchesDate = !date || event.date.toLowerCase().includes(date.replace('week', 'week').replace('month', 'month'));
+                const matchesLocation = !location || event.location.toLowerCase() === location.toLowerCase();
+
+                return matchesSearch && matchesCategory && matchesDate && matchesLocation;
+            });
+
+            displayEvents(filtered);
+        }
+
+        // Display all events on initial load
+        displayEvents(events);
+
+        // Add real-time search
+        document.getElementById('search').addEventListener('input', filterEvents);
+    </script>
+    <script>window.$zoho=window.$zoho || {};$zoho.salesiq=$zoho.salesiq||{ready:function(){}}</script><script id="zsiqscript" src="https://salesiq.zohopublic.com/widget?wc=siq94b9c3ed4a8918ca3a62e4c9450d7924" defer></script>
+</body>
+</html>
